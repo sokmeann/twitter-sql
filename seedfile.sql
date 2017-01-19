@@ -1,3 +1,5 @@
+-- DATABASE
+
 TRUNCATE TABLE users, tweets;
 
 INSERT INTO users (name, picture_url) VALUES ('Tom Hanks',           'http://i.imgur.com/XDjBjfu.jpg');
