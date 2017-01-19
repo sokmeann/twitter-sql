@@ -62,10 +62,26 @@ module.exports = function makeRouterWithSockets (io) {
 
   });
 
-  // create a new tweet
+  // create a new tweet, user does not exist yet
+
   router.post('/tweets', function(req, res, next){
-    //var newTweet = tweetBank.add(req.body.name, req.body.text);
-    client.query('INSERT INTO tweets (user_id, content) VALUES ((SELECT id FROM users WHERE name = $1), $2) RETURNING *', [req.body.name, req.body.text],
+
+    client.query('SELECT name FROM users WHERE users.name = $1', [req.body.name], function(err, result){
+
+      console.log('result ===========', result);
+
+      if(err) return next(err);
+
+      if(result.rows.length === 0){
+          client.query('INSERT INTO users (name) VALUES ($1) RETURNING *', [req.body.name], function(err, result){
+
+          if(err) return next(err);
+      });
+      };
+
+    });
+
+    client.query('INSERT INTO tweets (user_id, content) VALUES ((SELECT users.id FROM users INNER JOIN tweets ON users.id = tweets.user_id WHERE name = $1), $2) RETURNING *', [req.body.name, req.body.text],
                  function (err, result) {
                   if (err) return next(err);
 
